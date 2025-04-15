@@ -34,7 +34,7 @@ MKG3AFLAGS := -n basic:Dodger -i uns:../unselected.bmp -i sel:../selected.bmp
 CFLAGS	= -Os -Wall $(MACHDEP) $(INCLUDE) -ffunction-sections -fdata-sections 
 CXXFLAGS	=	$(CFLAGS)
 
-LDFLAGS	= $(MACHDEP) -T$(FXCGSDK)/toolchain/prizm.x -Wl,-static -Wl,-gc-sections
+LDFLAGS	= $(MACHDEP) -T$(FXCGSDK)/toolchain/prizm.x -Wl,-static -Wl,-gc-sections -fno-lto
 
 #---------------------------------------------------------------------------------
 # any extra libraries we wish to link with the project
