@@ -1,78 +1,152 @@
-#include <fxcg/display.h>
-#include <fxcg/keyboard.h>
-#include <fxcg/rtc.h>
+#include <gint/display.h>
+#include <gint/keyboard.h>
 
-#include <time.h>
+#include <gint/clock.h>
 
 #include "player.h"
 #include "constants.h"
-#include "enemy.h"
+#include "types.h"
 
 Player player;
-Enemy enemy;
-int running = 0;
+Scene scene = TITLE_SCENE;
 
-static int keyPressed(int basic_keycode){
-    const unsigned short* keyboard_register = (unsigned short*)0xA44B0000;
-    int row, col, word, bit;
-    row = basic_keycode%10;
-    col = basic_keycode/10-1;
-    word = row>>1;
-    bit = col + ((row&1)<<3);
-    return (0 != (keyboard_register[word] & 1<<bit));
+void init() {
+	player.x = WIDTH / 2;
+	player.y = HEIGHT;
+	player.w = 20;
+	player.h = 20;
+	player.speed = 2;
+	player.controls[CONTROL_LEFT] = false;
+	player.controls[CONTROL_RIGHT] = false;
 }
 
 void handle_input() {
-    if (keyPressed(KEY_PRGM_LEFT)) {
-        player_move(&player, -1, 0);
-    } else if (keyPressed(KEY_PRGM_RIGHT)) {
-        player_move(&player, 1, 0);
-    } 
-    
-    if (keyPressed(KEY_PRGM_MENU)) {
-        running = 0;
-        int key;
-        GetKey(&key);
-    }
-}
+	key_event_t e = pollevent();
 
-void draw() {
-    Bdisp_AllClr_VRAM();
-    
-    player_draw(&player);
-    enemy_draw(&enemy);
+	switch (scene) {
+		case TITLE_SCENE: {
+			if (e.type == KEYEV_DOWN) {
+				switch (e.key) {
+					case KEY_F1: {
+						scene = MAIN_SCENE;
+						init();
+						break;
+					}
+					case KEY_MENU: {
+						getkey();
+						break;
+					}
+				}
+			}
+			break;
+		}
+		case MAIN_SCENE: {
+			if (e.type == KEYEV_DOWN) {
+				switch (e.key) {
+					case KEY_LEFT: {
+						player_set_control(&player, CONTROL_LEFT, true);
+						player_set_control(&player, CONTROL_RIGHT, false);
+						break;
+					}
+					case KEY_RIGHT: {
+						player_set_control(&player, CONTROL_RIGHT, true);
+						player_set_control(&player, CONTROL_LEFT, false);						
+						break;
+					}
+					case KEY_EXIT: {
+						scene = PAUSE_SCENE;
+						break;
+					}
+				}
+			} else if (e.type == KEYEV_UP) {
+				switch (e.key) {
+					case KEY_LEFT: {
+						player_set_control(&player, CONTROL_LEFT, false);
+						break;
+					}
+					case KEY_RIGHT: {
+						player_set_control(&player, CONTROL_RIGHT, false);
+						break;
+					}
+				}
+			}
+			break;
+		}
+		case PAUSE_SCENE: {
+			if (e.type == KEYEV_DOWN) {
+				switch (e.key) {
+					case KEY_F1: {
+						scene = MAIN_SCENE;
+						break;
+					}
+					case KEY_F2: {
+						scene = TITLE_SCENE;
+						break;
+					}
+				}
+			}
+			break;
+		}
+		default: {
+			break;
+		}
+	}
 
-    Bdisp_PutDisp_DD();
 }
 
 void update() {
-    player_update(&player);
-    enemy_update(&enemy);
+	switch (scene) {
+		case MAIN_SCENE: {
+			player_update(&player);
+			break;
+		}
+		default: {
+			break;
+		}
+	}
 }
 
-void init() {
-    srand(RTC_GetTicks());
+void draw() {
+	dclear(C_BLACK);
 
-    Bdisp_EnableColor(1);
-    player.x = 0.5*WIDTH;
-    player.y = HEIGHT;
-    player.w = 20;
-    player.h = 20;
+	switch (scene) {
+		case TITLE_SCENE: {
+			dtext(0, 0, C_WHITE, "Dodger"); 
+			dtext(0, 20, C_WHITE, "F1: Play");
+			dtext(0, 30, C_WHITE, "F2: Tutorial");
+			dtext(0, 40, C_WHITE, "MENU: Quit Dodger");
 
-    enemy_init(&enemy);
+			break;
+		}
+		case MAIN_SCENE: {
+			player_draw(&player);
+			break;
+		} 
+		case PAUSE_SCENE: {
+			dtext(0, 0, C_WHITE, "Paused"); 
+			dtext(0, 20, C_WHITE, "F1: Resume");
+			dtext(0, 30, C_WHITE, "F2: Return to menu"); 
 
-    running = 1;
+			break;
+		}
+		case GAMEOVER_SCENE: {
+			dtext(0, 0, C_WHITE, "Game Over"); 
+			break;
+		}
+	}
+
+	dupdate();
 }
 
-void main(void) {
-    init();
+int main(void)
+{
+	init();
 
-    for(;;){
-        handle_input();
-        update();
-        draw();
-        if (running == 0) {
-            init();
-        }
-    }
+	for (;;) {
+		handle_input();
+		update();
+		draw();
+	}
+
+	return 1;
 }
