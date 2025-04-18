@@ -10,10 +10,13 @@
 
 #include <stdlib.h>
 #include <time.h>
+#include <stdio.h>
 
 Player player;
-Enemy enemy;
+Enemy enemies[5];
 Scene scene = TITLE_SCENE;
+
+int max_enemies = 3;
 
 void init() {
 	player.x = WIDTH / 2;
@@ -23,7 +26,10 @@ void init() {
 	player.speed = 2;
 	player.controls[CONTROL_LEFT] = false;
 	player.controls[CONTROL_RIGHT] = false;
-	enemy_constructor(&enemy, player.x, player.y);
+	
+	for (int i = 0; i < max_enemies; i++) {
+		enemy_dummy_constructor(&enemies[i]);
+	}
 }
 
 void handle_input() {
@@ -104,6 +110,14 @@ void update() {
 	switch (scene) {
 		case MAIN_SCENE: {
 			player_update(&player);
+			for (int i = 0; i < max_enemies; i++) {
+				Enemy enemy = enemies[i];
+				if (enemy.valid) {
+					enemy_update(&enemies[i]);
+				} else {
+					enemy_constructor(&enemies[i], player.x, player.y);
+				}
+			}
 			break;
 		}
 		default: {
@@ -126,7 +140,12 @@ void draw() {
 		}
 		case MAIN_SCENE: {
 			player_draw(&player);
-			enemy_draw(&enemy);
+			for (int i = 0; i < max_enemies; i++) {
+				Enemy enemy = enemies[i];
+				if (enemy.valid) {
+					enemy_draw(&enemy);
+				}
+			}
 			break;
 		} 
 		case PAUSE_SCENE: {
@@ -148,7 +167,7 @@ void draw() {
 int main(void)
 {
 	srand(time(NULL));
-	
+
 	for (;;) {
 		handle_input();
 		update();

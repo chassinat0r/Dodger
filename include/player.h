@@ -5,8 +5,8 @@
 #define CONTROL_RIGHT 1
 
 typedef struct {
-    int x;
-    int y;
+    double x;
+    double y;
     int w;
     int h;
     int speed;
