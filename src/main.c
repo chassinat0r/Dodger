@@ -4,10 +4,15 @@
 #include <gint/clock.h>
 
 #include "player.h"
+#include "enemy.h"
 #include "constants.h"
 #include "types.h"
 
+#include <stdlib.h>
+#include <time.h>
+
 Player player;
+Enemy enemy;
 Scene scene = TITLE_SCENE;
 
 void init() {
@@ -18,6 +23,7 @@ void init() {
 	player.speed = 2;
 	player.controls[CONTROL_LEFT] = false;
 	player.controls[CONTROL_RIGHT] = false;
+	enemy_constructor(&enemy, player.x, player.y);
 }
 
 void handle_input() {
@@ -120,6 +126,7 @@ void draw() {
 		}
 		case MAIN_SCENE: {
 			player_draw(&player);
+			enemy_draw(&enemy);
 			break;
 		} 
 		case PAUSE_SCENE: {
@@ -140,8 +147,8 @@ void draw() {
 
 int main(void)
 {
-	init();
-
+	srand(time(NULL));
+	
 	for (;;) {
 		handle_input();
 		update();
