@@ -34,12 +34,12 @@ void enemy_dummy_constructor(Enemy *enemy) {
     enemy->valid = false;
 }
 
-void enemy_update(Enemy *enemy, int *died_count) {
+void enemy_update(Enemy *enemy, int *points) {
     enemy->x += enemy->speed*sin(enemy->angle);
     enemy->y += enemy->speed*cos(enemy->angle);
     if (enemy->y + enemy->w > HEIGHT) {
         enemy->valid = false;
-        *died_count = *died_count + 1;
+        *points = *points + 1;
     }
 }
 

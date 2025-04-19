@@ -17,16 +17,16 @@ Player player;
 Enemy enemies[5];
 Scene scene = TITLE_SCENE;
 
-int died_count;
-int last_died_count;
-
 int max_enemies;
 double enemy_speed;
 const double max_enemy_speed = 6;
 
+int points;
+int last_points;
+
 void init() {
-	died_count = 0;
-	last_died_count = 0;
+	points = 0;
+	last_points = 0;
 	max_enemies = 3;
 	enemy_speed = 3;
 
@@ -146,7 +146,8 @@ void update() {
 			for (int i = 0; i < max_enemies; i++) {
 				Enemy enemy = enemies[i];
 				if (enemy.valid) {
-					enemy_update(&enemies[i], &died_count);
+					enemy_update(&enemies[i], &points);
+
 					HitBox enemy_hb;
 					enemy_hb.left = enemies[i].x - 0.5*enemies[i].w;
 					enemy_hb.right = enemies[i].x + 0.5*enemies[i].w;
@@ -161,9 +162,9 @@ void update() {
 				}
 			}
 			
-			if (died_count % 10*max_enemies == 0 && died_count > 0 && last_died_count != died_count) {
+			if (points % 10*max_enemies == 0 && points > 0 && last_points != points) {
 				enemy_speed += 0.1;
-				last_died_count = died_count;
+				last_points = points;
 				if (enemy_speed > max_enemy_speed) {
 					enemy_speed = max_enemy_speed;
 				}
@@ -197,6 +198,10 @@ void draw() {
 					enemy_draw(&enemy);
 				}
 			}
+
+			char points_txt[15];
+			sprintf(points_txt, "Points: %d", points);
+			dtext(0, 0, C_WHITE, points_txt);
 
 			break;
 		} 
