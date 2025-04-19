@@ -161,8 +161,8 @@ void update() {
 				}
 			}
 			
-			if (died_count % 5*max_enemies == 0 && died_count > 0 && last_died_count != died_count) {
-				enemy_speed += 0.2;
+			if (died_count % 10*max_enemies == 0 && died_count > 0 && last_died_count != died_count) {
+				enemy_speed += 0.1;
 				last_died_count = died_count;
 				if (enemy_speed > max_enemy_speed) {
 					enemy_speed = max_enemy_speed;
