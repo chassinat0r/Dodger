@@ -17,13 +17,19 @@ Player player;
 Enemy enemies[5];
 Scene scene = TITLE_SCENE;
 
-int died_count = 0;
-int last_died_count = 0;
+int died_count;
+int last_died_count;
 
-int max_enemies = 3;
-double enemy_speed = 3;
+int max_enemies;
+double enemy_speed;
+const double max_enemy_speed = 6;
 
 void init() {
+	died_count = 0;
+	last_died_count = 0;
+	max_enemies = 3;
+	enemy_speed = 3;
+
 	player.x = WIDTH / 2;
 	player.y = HEIGHT;
 	player.w = 20;
@@ -158,6 +164,9 @@ void update() {
 			if (died_count % 5*max_enemies == 0 && died_count > 0 && last_died_count != died_count) {
 				enemy_speed += 0.2;
 				last_died_count = died_count;
+				if (enemy_speed > max_enemy_speed) {
+					enemy_speed = max_enemy_speed;
+				}
 			}
 
 			break;
