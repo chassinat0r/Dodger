@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-void enemy_constructor(Enemy *enemy, double player_x, double player_y) {
+void enemy_constructor(Enemy *enemy, double player_x, double player_y, double speed) {
     enemy->w = ENEMY_WIDTH;
     enemy->h = ENEMY_HEIGHT;
 
@@ -21,7 +21,7 @@ void enemy_constructor(Enemy *enemy, double player_x, double player_y) {
     enemy->y = enemy->w;
 
     enemy->angle = atan((enemy->x - player_x) / (enemy->y - player_y));
-    
+    enemy->speed = speed;
     enemy->valid = true;
 }
 
@@ -34,11 +34,12 @@ void enemy_dummy_constructor(Enemy *enemy) {
     enemy->valid = false;
 }
 
-void enemy_update(Enemy *enemy) {
-    enemy->x += ENEMY_SPEED*sin(enemy->angle);
-    enemy->y += ENEMY_SPEED*cos(enemy->angle);
+void enemy_update(Enemy *enemy, int *died_count) {
+    enemy->x += enemy->speed*sin(enemy->angle);
+    enemy->y += enemy->speed*cos(enemy->angle);
     if (enemy->y + enemy->w > HEIGHT) {
         enemy->valid = false;
+        *died_count = *died_count + 1;
     }
 }
 

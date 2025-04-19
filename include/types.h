@@ -8,4 +8,11 @@ typedef enum {
     GAMEOVER_SCENE
 } Scene;
 
+typedef struct {
+    double left;
+    double right;
+    double top;
+    double bottom;
+} HitBox;
+
 #endif

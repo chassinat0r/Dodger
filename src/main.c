@@ -7,6 +7,7 @@
 #include "enemy.h"
 #include "constants.h"
 #include "types.h"
+#include "util.h"
 
 #include <stdlib.h>
 #include <time.h>
@@ -16,7 +17,11 @@ Player player;
 Enemy enemies[5];
 Scene scene = TITLE_SCENE;
 
+int died_count = 0;
+int last_died_count = 0;
+
 int max_enemies = 3;
+double enemy_speed = 3;
 
 void init() {
 	player.x = WIDTH / 2;
@@ -99,6 +104,22 @@ void handle_input() {
 			}
 			break;
 		}
+		case GAMEOVER_SCENE: {
+			if (e.type == KEYEV_DOWN) {
+				switch (e.key) {
+					case KEY_F1: {
+						scene = MAIN_SCENE;
+						init();
+						break;
+					}
+					case KEY_F2: {
+						scene = TITLE_SCENE;
+						break;
+					}
+				}
+			}
+			break;
+		}
 		default: {
 			break;
 		}
@@ -110,14 +131,35 @@ void update() {
 	switch (scene) {
 		case MAIN_SCENE: {
 			player_update(&player);
+			HitBox player_hb;
+			player_hb.left = player.x - 0.5*player.w;
+			player_hb.right = player.x + 0.5*player.w;
+			player_hb.top = player.y - player.h;
+			player_hb.bottom = player.y;
+
 			for (int i = 0; i < max_enemies; i++) {
 				Enemy enemy = enemies[i];
 				if (enemy.valid) {
-					enemy_update(&enemies[i]);
+					enemy_update(&enemies[i], &died_count);
+					HitBox enemy_hb;
+					enemy_hb.left = enemies[i].x - 0.5*enemies[i].w;
+					enemy_hb.right = enemies[i].x + 0.5*enemies[i].w;
+					enemy_hb.top = enemies[i].y - 0.5*enemies[i].h;
+					enemy_hb.bottom = enemies[i].y + 0.5*enemies[i].h;
+
+					if (sprites_colliding(enemy_hb, player_hb)) {
+						scene = GAMEOVER_SCENE;
+					}
 				} else {
-					enemy_constructor(&enemies[i], player.x, player.y);
+					enemy_constructor(&enemies[i], player.x, player.y, enemy_speed);
 				}
 			}
+			
+			if (died_count % 5*max_enemies == 0 && died_count > 0 && last_died_count != died_count) {
+				enemy_speed += 0.2;
+				last_died_count = died_count;
+			}
+
 			break;
 		}
 		default: {
@@ -146,6 +188,7 @@ void draw() {
 					enemy_draw(&enemy);
 				}
 			}
+
 			break;
 		} 
 		case PAUSE_SCENE: {
@@ -157,6 +200,8 @@ void draw() {
 		}
 		case GAMEOVER_SCENE: {
 			dtext(0, 0, C_WHITE, "Game Over"); 
+			dtext(0, 20, C_WHITE, "F1: Play again");
+			dtext(0, 30, C_WHITE, "F2: Return to menu");
 			break;
 		}
 	}

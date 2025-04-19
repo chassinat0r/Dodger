@@ -14,6 +14,7 @@ set(SOURCES
   src/main.c
   src/player.c
   src/enemy.c
+  src/util.c
   # ...
 )
 # Shared assets, fx-9860G-only assets and fx-CG-50-only assets
